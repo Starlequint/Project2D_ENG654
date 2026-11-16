@@ -2,7 +2,6 @@
 
 This repository contains the MATLAB, Simulink, notebook, and report materials for a 2D kinematically redundant planar parallel manipulator study, including forward/inverse kinematics and animation of the robot motion.
 
-- README.md — This overview file, describing the purpose and contents of the project.
 - Jacobian.pdf — PDF of the Jacobian derivation and motion/constraint analysis used for the robot model.
 - project_2D.pdf — Final project report or summary PDF covering the 2D robot design and kinematic analysis.
 - project_kinematics.m — MATLAB script that computes the robot geometry and plots the solved 2D configuration for the three 5-bar branches.
