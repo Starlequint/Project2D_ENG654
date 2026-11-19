@@ -1,0 +1,10 @@
+{
+  "_id":"1",
+  "_mw_element_name":"WindowsInfo",
+  "_mw_element_type":"COSObject",
+  "_object_class":"Simulink.BDWindowsInfo",
+  "_properties":{
+    "BDUuid":"",
+    "WindowsInfo":[]
+  }
+}

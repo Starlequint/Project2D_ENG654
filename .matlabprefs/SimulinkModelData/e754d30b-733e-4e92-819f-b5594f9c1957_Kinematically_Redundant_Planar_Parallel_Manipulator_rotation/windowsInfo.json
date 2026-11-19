@@ -1,0 +1,114 @@
+{
+  "_id":"1",
+  "_mw_element_name":"WindowsInfo",
+  "_mw_element_type":"COSObject",
+  "_object_class":"Simulink.BDWindowsInfo",
+  "_properties":{
+    "BDUuid":"87dd64a1-f87a-436e-8f5c-9b8f32c3a0c2",
+    "WindowsInfo":{
+      "_id":"2",
+      "_object_class":"Simulink.WindowInfo",
+      "_properties":{
+        "DockComponentsInfo":{
+          "_array_class":"Simulink.DockComponentInfo",
+          "_dimensions":[1,  2],
+          "_elements":[
+            {
+              "_id":"6",
+              "_properties":{
+                "CreateCallback":"",
+                "DockPosition":"Right",
+                "Floating":false,
+                "Height":{
+                  "_type":"int32",
+                  "_value":"480"
+                },
+                "ID":"Property Inspector",
+                "Minimized":"On",
+                "Type":"GLUE2:PropertyInspector",
+                "UserData":"",
+                "Visible":true,
+                "Width":{
+                  "_type":"int32",
+                  "_value":"640"
+                }
+              }
+            },
+            {
+              "_id":"7",
+              "_properties":{
+                "CreateCallback":"",
+                "DockPosition":"Left",
+                "Floating":false,
+                "Height":{
+                  "_type":"int32",
+                  "_value":"480"
+                },
+                "ID":"Referenced Files",
+                "Minimized":"Unset",
+                "Type":"Simulink:Editor:ReferencedFiles",
+                "UserData":"{\"filterShowRefModels\":\"true\",\"filterShowRefSubs\":\"true\",\"filterShowOnlyDirtyFiles\":\"false\"}",
+                "Visible":false,
+                "Width":{
+                  "_type":"int32",
+                  "_value":"640"
+                }
+              }
+            }
+          ]
+        },
+        "EditorsInfo":{
+          "_id":"5",
+          "_object_class":"Simulink.EditorInfo",
+          "_properties":{
+            "Extents":[878,  485],
+            "IsActive":true,
+            "IsTabbed":true,
+            "LoadSaveID":"0",
+            "Offset":[-161.71134020618547,  0],
+            "SceneRectInView":[-161.71134020618547,  0,  1303.4226804123709,  720],
+            "ViewObjType":"SimulinkTopLevel",
+            "ZoomFactor":0.67361111111111116
+          }
+        },
+        "ExplorerBarInfo":{
+          "_id":"4",
+          "_object_class":"Simulink.ExplorerBarInfo",
+          "_properties":{
+            "Visible":true
+          }
+        },
+        "IsActive":true,
+        "Location":[30,  30,  980,  720],
+        "ModelBrowserInfo":{
+          "_id":"3",
+          "_object_class":"Simulink.ModelBrowserInfo",
+          "_properties":{
+            "DockPosition":"Left",
+            "Filter":{
+              "_type":"int32",
+              "_value":"9"
+            },
+            "Height":{
+              "_type":"int32",
+              "_value":"50"
+            },
+            "Minimized":"On",
+            "Visible":true,
+            "Width":{
+              "_type":"int32",
+              "_value":"50"
+            }
+          }
+        },
+        "PersistedApps":{
+          "_array_type":"Cell",
+          "_dimensions":[0,  1],
+          "_elements":[]
+        },
+        "WindowState":"AAAA\/wAAAAD9AAAAAwAAAAAAAAC9AAAB+PwCAAAABPsAAAAWAEQAbwBjAGsAVwBpAGQAZwBlAHQAMwEAAAAxAAAB+AAAAAAAAAAA+wAAABYARABvAGMAawBXAGkAZABnAGUAdAA0AAAAAAD\/\/\/\/\/AAAAAAAAAAD7AAAAUgBHAEwAVQBFADIAIAB0AHIAZQBlACAAYwBvAG0AcABvAG4AZQBuAHQALwBHAEwAVQBFADIAIAB0AHIAZQBlACAAYwBvAG0AcABvAG4AZQBuAHQAAAAAAP\/\/\/\/8AAABjAP\/\/\/\/sAAABgAFMAaQBtAHUAbABpAG4AawA6AEUAZABpAHQAbwByADoAUgBlAGYAZQByAGUAbgBjAGUAZABGAGkAbABlAHMALwBSAGUAZgBlAHIAZQBuAGMAZQBkACAARgBpAGwAZQBzAAAAAAD\/\/\/\/\/AAAAjQD\/\/\/8AAAABAAAAAAAAAAD8AgAAAAH7AAAAVABHAEwAVQBFADIAOgBQAHIAbwBwAGUAcgB0AHkASQBuAHMAcABlAGMAdABvAHIALwBQAHIAbwBwAGUAcgB0AHkAIABJAG4AcwBwAGUAYwB0AG8AcgAAAAAA\/\/\/\/\/wAAAawA\/\/\/\/AAAAAwAAAAAAAAAA\/AEAAAAB+\/\/\/\/\/8AAAAAAP\/\/\/\/8AAAJ5AP\/\/\/wAAA5AAAAIiAAAAAQAAAAIAAAABAAAAAvwAAAADAAAAAAAAAAEAAAA2AGMAbwBsAGwAYQBwAHMAaQBiAGwAZQBQAGEAbgBlAGwAVABvAG8AbABCAGEAcgBMAGUAZgB0AwAAAAD\/\/\/\/\/AAAAAAAAAAAAAAABAAAAAQAAADgAYwBvAGwAbABhAHAAcwBpAGIAbABlAFAAYQBuAGUAbABUAG8AbwBsAEIAYQByAFIAaQBnAGgAdAMAAAAA\/\/\/\/\/wAAAAAAAAAAAAAAAwAAAAEAAAA6AGMAbwBsAGwAYQBwAHMAaQBiAGwAZQBQAGEAbgBlAGwAVABvAG8AbABCAGEAcgBCAG8AdAB0AG8AbQAAAAAA\/\/\/\/\/wAAAAAAAAAA",
+        "WindowUuid":"95320214-76e4-4790-bce9-83d13c5b0769"
+      }
+    }
+  }
+}

@@ -23,6 +23,17 @@ DE = 0.2;
 EA = 0.2;
 CF = 0.2;
 FF = 0.2;
+connectorLength = 0.22;
+triangleSide = 0.08;
+minimumSingularityMargin = deg2rad(2);
+activeMotorIndices = [1 3 5];
+motorConverters = {'Simulink-PS Converter', ...
+    'Simulink-PS Converter1', 'Simulink-PS Converter2', ...
+    'Simulink-PS Converter3', 'Simulink-PS Converter4', ...
+    'Simulink-PS Converter5'};
+motorJoints = {'Revolute Joint', 'Revolute Joint3', ...
+    'Revolute Joint5', 'Revolute Joint8', ...
+    'Revolute Joint10', 'Revolute Joint13'};
 A1A2t = 2*pi/3;
 A1A2x = (0.5 + cos(pi/3) + 2*cos(pi/6) + cos(5*pi/6 - 2*pi/5))*AB;
 A1A2y = (sin(2*pi/5) + sin(4*pi/5) + 1 + sin(pi/3) + ...
@@ -56,7 +67,8 @@ assignin('base', 'A1A5t', A1A5t);
 assignin('base', 'OA', OA);
 assignin('base', 'EO', EO);
 
-[time, position, velocity, acceleration] = notebookMotorTrajectory();
+[time, position, velocity, acceleration] = notebookMotorTrajectory( ...
+    connectorLength, triangleSide, minimumSingularityMargin);
 
 for motorIndex = 1:6
     signalNames = {'position', 'velocity', 'acceleration'};
@@ -87,26 +99,19 @@ else
     load_system(animationModel);
 end
 set_param(animationModel, 'StopTime', num2str(time(end), '%.15g'));
+set_param(animationModel, 'MaxStep', ...
+    num2str((time(2) - time(1))/4, '%.15g'));
 
-if ~isExistingAnimation
-% Match the notebook's 0.23 m connector and 0.10 m platform sides.
 for solidName = {'EF1', 'EF2', 'EF3'}
     set_param([animationModel '/' solidName{1}], ...
-        'BrickDimensions', '[0.23 0.1 0.1]');
+        'BrickDimensions', sprintf('[%.15g 0.1 0.1]', connectorLength));
 end
 for solidName = {'F12', 'F23', 'F31'}
     set_param([animationModel '/' solidName{1}], ...
-        'BrickDimensions', '[0.10 0.1 0.1]');
+        'BrickDimensions', sprintf('[%.15g 0.1 0.1]', triangleSide));
 end
 
-motorConverters = {'Simulink-PS Converter', ...
-    'Simulink-PS Converter1', 'Simulink-PS Converter2', ...
-    'Simulink-PS Converter3', 'Simulink-PS Converter4', ...
-    'Simulink-PS Converter5'};
-motorJoints = {'Revolute Joint', 'Revolute Joint3', ...
-    'Revolute Joint5', 'Revolute Joint8', ...
-    'Revolute Joint10', 'Revolute Joint13'};
-
+if ~isExistingAnimation
 for motorIndex = 1:6
     converterPath = [animationModel '/' motorConverters{motorIndex}];
     set_param(converterPath, 'FilteringAndDerivatives', 'provide');
@@ -116,21 +121,6 @@ for motorIndex = 1:6
         error('Expected position, velocity, and acceleration inputs at %s.', ...
             converterPath);
     end
-
-    jointPath = [animationModel '/' motorJoints{motorIndex}];
-    if motorIndex == 2 || motorIndex == 4 || motorIndex == 6
-        set_param(jointPath, ...
-            'MotionActuationMode', 'InputMotion', ...
-            'TorqueActuationMode', 'ComputedTorque');
-        converterPorts = get_param(converterPath, 'PortHandles');
-        jointPorts = get_param(jointPath, 'PortHandles');
-        add_line(animationModel, converterPorts.RConn(1), jointPorts.LConn(2), ...
-            'autorouting', 'on');
-    end
-    set_param(jointPath, ...
-        'PositionTargetValue', num2str(rad2deg(position(1, motorIndex)), '%.15g'), ...
-        'PositionTargetPriority', 'High', ...
-        'TorqueActuationMode', 'ComputedTorque');
 
     portHandles = get_param(converterPath, 'PortHandles');
     inputBlocks = {sprintf('NotebookMotor%d_position', motorIndex), ...
@@ -157,9 +147,43 @@ for motorIndex = 1:6
             'autorouting', 'on');
     end
 end
-
-save_system(animationModel, animationFile);
 end
+
+% One driven motor per 5-bar branch avoids over-constraining the closed loops.
+for motorIndex = 1:6
+    converterPath = [animationModel '/' motorConverters{motorIndex}];
+    jointPath = [animationModel '/' motorJoints{motorIndex}];
+    converterPorts = get_param(converterPath, 'PortHandles');
+
+    if ismember(motorIndex, activeMotorIndices)
+        set_param(jointPath, ...
+            'MotionActuationMode', 'InputMotion', ...
+            'TorqueActuationMode', 'ComputedTorque');
+        jointPorts = get_param(jointPath, 'PortHandles');
+        if get_param(converterPorts.RConn(1), 'Line') == -1
+            add_line(animationModel, converterPorts.RConn(1), ...
+                jointPorts.LConn(2), 'autorouting', 'on');
+        end
+        targetPriority = 'High';
+    else
+        if strcmp(get_param(jointPath, 'MotionActuationMode'), 'InputMotion')
+            jointPorts = get_param(jointPath, 'PortHandles');
+            if get_param(converterPorts.RConn(1), 'Line') ~= -1
+                delete_line(animationModel, converterPorts.RConn(1), ...
+                    jointPorts.LConn(2));
+            end
+        end
+        set_param(jointPath, ...
+            'MotionActuationMode', 'ComputedMotion', ...
+            'TorqueActuationMode', 'NoTorque');
+        targetPriority = 'Low';
+    end
+
+    set_param(jointPath, ...
+        'PositionTargetValue', num2str(rad2deg(position(1, motorIndex)), '%.15g'), ...
+        'PositionTargetPriority', targetPriority);
+end
+save_system(animationModel, animationFile);
 
 if usejava('desktop')
     open_system(animationModel);
@@ -168,10 +192,9 @@ sim(animationModel);
 
 fprintf('Simscape animation completed: %s\n', animationFile);
 
-function [time, position, velocity, acceleration] = notebookMotorTrajectory()
+function [time, position, velocity, acceleration] = notebookMotorTrajectory( ...
+    connectorLength, triangleSide, minimumSingularityMargin)
 linkLength = 0.2;
-connectorLength = 0.23;
-triangleSide = 0.1;
 platformCenter = [0.134; 0.547];
 frameCount = 360;
 connectorDirectionCount = 360;
@@ -194,6 +217,7 @@ connectorAngles = -pi + (0:connectorDirectionCount - 1)* ...
     (2*pi/connectorDirectionCount);
 allMotorAngles = zeros(frameCount, 3, 2);
 previousStates = cell(1, 3);
+neighborIndices = [2 3; 3 1; 1 2];
 
 for frameIndex = 1:frameCount
     alpha = rotationAngles(frameIndex);
@@ -205,9 +229,12 @@ for frameIndex = 1:frameCount
     end
 
     for legIndex = 1:3
+        platformNeighborVectors = ...
+            vertices(:, neighborIndices(legIndex, :)) - vertices(:, legIndex);
         state = chooseLegState(vertices(:, legIndex), legIndex, ...
-            previousStates{legIndex}, frameIndex == 1, leftAnchors, ...
-            baseAngles, linkLength, connectorLength, connectorAngles, tolerance);
+            platformNeighborVectors, previousStates{legIndex}, ...
+            frameIndex == 1, leftAnchors, baseAngles, linkLength, ...
+            connectorLength, connectorAngles, minimumSingularityMargin, tolerance);
         allMotorAngles(frameIndex, legIndex, :) = ...
             reshape(state.motorAngles, 1, 1, 2);
         previousStates{legIndex} = state;
@@ -254,8 +281,9 @@ for motorIndex = 1:size(position, 2)
 end
 end
 
-function state = chooseLegState(vertex, legIndex, previousState, firstFrame, ...
-    leftAnchors, baseAngles, linkLength, connectorLength, connectorAngles, tolerance)
+function state = chooseLegState(vertex, legIndex, platformNeighborVectors, ...
+    previousState, firstFrame, leftAnchors, baseAngles, linkLength, ...
+    connectorLength, connectorAngles, minimumSingularityMargin, tolerance)
 bestScore = inf;
 state = [];
 
@@ -263,7 +291,18 @@ for connectorIndex = 1:numel(connectorAngles)
     connectorAngle = connectorAngles(connectorIndex);
     endpointGlobal = vertex + connectorLength* ...
         [cos(connectorAngle); sin(connectorAngle)];
+    connectorVector = vertex - endpointGlobal;
+    platformMargins = zeros(1, size(platformNeighborVectors, 2));
+    for neighborIndex = 1:numel(platformMargins)
+        platformMargins(neighborIndex) = alignmentMargin(connectorVector, ...
+            platformNeighborVectors(:, neighborIndex));
+    end
+    if min(platformMargins) < minimumSingularityMargin
+        continue
+    end
+
     rotation = rotationMatrix(-baseAngles(legIndex));
+    connectorVectorLocal = rotation*connectorVector;
     endpointLocal = rotation*(endpointGlobal - leftAnchors(:, legIndex));
 
     leftElbows = circleIntersections([0; 0], linkLength, ...
@@ -275,6 +314,23 @@ for connectorIndex = 1:numel(connectorAngles)
         for rightIndex = 1:size(rightElbows, 2)
             elbowLeft = leftElbows(:, leftIndex);
             elbowRight = rightElbows(:, rightIndex);
+            % Avoid alignment at elbow, distal-link, and platform joints.
+            leftMargin = alignmentMargin(-elbowLeft, ...
+                endpointLocal - elbowLeft);
+            rightMargin = alignmentMargin([linkLength; 0] - elbowRight, ...
+                endpointLocal - elbowRight);
+            parallelMargin = alignmentMargin(elbowLeft - endpointLocal, ...
+                elbowRight - endpointLocal);
+            leftConnectorMargin = alignmentMargin( ...
+                elbowLeft - endpointLocal, connectorVectorLocal);
+            rightConnectorMargin = alignmentMargin( ...
+                elbowRight - endpointLocal, connectorVectorLocal);
+            if min([leftMargin, rightMargin, parallelMargin, ...
+                    leftConnectorMargin, rightConnectorMargin]) < ...
+                    minimumSingularityMargin
+                continue
+            end
+
             assemblySign = cross2d(elbowRight - elbowLeft, ...
                 endpointLocal - elbowLeft);
             if abs(assemblySign) <= tolerance
@@ -311,7 +367,9 @@ for connectorIndex = 1:numel(connectorAngles)
 end
 
 if isempty(state)
-    error('No reachable configuration for leg %d.', legIndex);
+    error(['No reachable configuration for leg %d satisfying the ' ...
+        '%.2f-degree singularity margin.'], legIndex, ...
+        rad2deg(minimumSingularityMargin));
 end
 end
 
@@ -343,6 +401,11 @@ end
 
 function value = cross2d(vector0, vector1)
 value = vector0(1)*vector1(2) - vector0(2)*vector1(1);
+end
+
+function margin = alignmentMargin(vector0, vector1)
+angle = atan2(abs(cross2d(vector0, vector1)), dot(vector0, vector1));
+margin = min(angle, pi - angle);
 end
 
 function angle = wrapAngle(angle)
